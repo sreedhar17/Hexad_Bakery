@@ -91,7 +91,7 @@ def printReceipt(code, qty, minPacks, ordered_price_dict):
         print(round(total_price,2))
         denomination = denomination + "\t"+str(packKey)+SPACE+"X"+SPACE+str(packValue)+SPACE+CURRENCY+str(pack_price)+"\n"
 
-    print(str(qty)+SPACE+code+SPACE+"$"+str(round(total_price,2)))
+    print(str(qty)+SPACE+code+SPACE+CURRENCY+str(round(total_price,2)))
     print(denomination)
 
 

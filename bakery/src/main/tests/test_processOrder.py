@@ -14,6 +14,12 @@ class TestProcessOrder(unittest.TestCase):
         result=['3:5', '2:2']
         self.assertListEqual(calculateMinPacks(orderedQty, packSizes), result)
 
+    def test_inValidQty(self):
+        orderedQty=1
+        packSizes=[3, 5]
+        result=[]
+        self.assertListEqual(calculateMinPacks(orderedQty, packSizes), result)
+
 
 if __name__ == '__main__':
     unittest.main()

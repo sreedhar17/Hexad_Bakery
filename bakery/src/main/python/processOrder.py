@@ -9,7 +9,19 @@ def readOrder():
     print("Your order is::::::", orderList)
     qty = int(orderList[0])
     code = str(orderList[1])
-    processOrder(qty, code)
+    if findProduct(code):
+        processOrder(qty, code)
+
+
+def findProduct(code):
+    with open('../../../data/data.json') as f:
+        products = json.load(f)
+
+    found = False
+    for key in products.keys():
+        if key == code:
+            found = True
+    return found
 
 
 def processOrder(qty, code, ordered_dict=None):
@@ -88,10 +100,11 @@ def printReceipt(code, qty, minPacks, ordered_price_dict):
         pack_price = ordered_price_dict[packValue]
         print(pack_price)
         total_price = total_price + int(packKey) * pack_price
-        print(round(total_price,2))
-        denomination = denomination + "\t"+str(packKey)+SPACE+"X"+SPACE+str(packValue)+SPACE+CURRENCY+str(pack_price)+"\n"
+        print(round(total_price, 2))
+        denomination = denomination + "\t" + str(packKey) + SPACE + "X" + SPACE + str(
+            packValue) + SPACE + CURRENCY + str(pack_price) + "\n"
 
-    print(str(qty)+SPACE+code+SPACE+CURRENCY+str(round(total_price,2)))
+    print(str(qty) + SPACE + code + SPACE + CURRENCY + str(round(total_price, 2)))
     print(denomination)
 
 

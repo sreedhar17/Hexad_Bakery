@@ -37,10 +37,14 @@ def processOrder(qty, code, ordered_dict=None):
     packArr = getPackArray(products, code)
 
     minPacks = calculateMinPacks(qty, packArr)
-
-    ordered_dict = products[code]
-    ordered_price_dict = ordered_dict["packs"]
-    printReceipt(code, qty, minPacks, ordered_price_dict)
+    if len(minPacks) > 0:
+        ordered_dict = products[code]
+        ordered_price_dict = ordered_dict["packs"]
+        printReceipt(code, qty, minPacks, ordered_price_dict)
+    else:
+        print("No packs available.  Please choose valid quantity")
+        minPacks = ["Invalid quantity. No packs available for given quantity."]
+        return minPacks
 
 
 def getPackArray(products, code):
@@ -57,31 +61,71 @@ def getPackArray(products, code):
     return packArr
 
 
-def calculateMinPacks(orderQty, packArr):
+def calculateMinPacks(orderQty, packArr, result=[]):
     logging.info("Inside calculateMinPacks method")
     print("packArr inside calculateMinPacks::", packArr)
+    multiples = [1, 2, 3, 4, 5, 6, 7, 8, 9]
     packArr = sorted(packArr, reverse=True)
     print("Sorted Array is::", packArr)
-    result = {}
-    for pack in packArr:
-        if orderQty == pack:
-            print("packQty::::::", 1)
-            result.__setitem__(str(1), str(pack))
-        elif int(orderQty) % int(pack) == 0:
-            print("In else::")
-            result.__setitem__(str(int(orderQty) // int(pack)), str(pack))
-            print("result:::::::", result)
-            break
-        elif int(orderQty) > int(pack):
-            if str(int(orderQty) % int(pack)) not in packArr:
+    for i in range(len(packArr)):
+        if int(orderQty > 0):
+            packSize = packArr[i]
+            if int(orderQty) == int(packSize):
+                result.append(str(1) + ":" + str(packSize))
+                break
+            elif int(orderQty) % int(packSize) == 0:
+                packQty = int(orderQty) // int(packSize)
+                result.append(str(int(orderQty) // int(packSize)) + ":" + str(packSize))
+                break
+            elif int(orderQty) > int(packSize):
+                if str(int(orderQty) % int(packSize)) not in packArr:
+                    for j in range(len(packArr)):
+                        packSize = packArr[j]
+                        possibleSizeArr = []
+                        if (j + 1) == len(packArr):
+                            index = j
+                        else:
+                            index = j + 1
+                        for k in range(0, len(multiples)):
+                            packMultiples = int(multiples[k]) * int(packSize)
+                            if int(orderQty) >= int(packMultiples):
+                                if (int(orderQty) - packMultiples) % int(packArr[index]) == 0:
+                                    possibleSizeArr.append(str(multiples[k]) + ":" + str(packSize))
+                                    if (k + 1) == len(multiples):
+                                        if len(possibleSizeArr) > 0:
+                                            result.append(possibleSizeArr[-1])
+                                            orderQty = int(orderQty) - (int(packSize) * int(multiples[k]))
+                                            break
+                                else:
+                                    if index < len(packArr)-1:
+                                        index = index+1
+                                        if (int(orderQty) - packMultiples) % int(packArr[index]) == 0:
+                                            possibleSizeArr.append(str(multiples[k]) + ":" + str(packSize))
+                                            if (k + 1) == len(multiples):
+                                                if len(possibleSizeArr) > 0:
+                                                    result.append(possibleSizeArr[-1])
+                                                    orderQty = int(orderQty) - (int(packSize) * int(multiples[k]))
+                                                    break
+                                    continue
+                            else:
+                                if len(possibleSizeArr) > 0:
+                                    result.append(possibleSizeArr[-1])
+                                    orderQty = int(orderQty) - (int(packSize) * int(multiples[k - 1]))
+                                break
+                        else:
+                            break
+                else:
+                    packQty = int(orderQty) // int(packSize)
+                    result.append(str(packQty) + ":" + str(packSize))
+                    orderQty = int(orderQty) - (int(packSize) * packQty)
+                    if orderQty > 0:
+                        calculateMinPacks(orderQty, packArr, result)
+            elif int(orderQty) < int(packSize):
                 continue
+            # print("No packs:::")
             else:
-                packQty = int(orderQty) // int(pack)
-                result.__setitem__(str(packQty), str(pack))
-                orderQty = int(orderQty) - (int(pack) * packQty)
-                calculateMinPacks(orderQty, packArr)
-        else:
-            print("Packs Unavailable.")
+                print("Packs Unavailable.")
+                break
     print("result:::::::::", result)
     return result
 
@@ -93,9 +137,11 @@ def printReceipt(code, qty, minPacks, ordered_price_dict):
     SPACE = " "
     CURRENCY = "$"
     denomination = ""
-    for packKey in minPacks:
-        print("packkey:::", str(packKey))
-        packValue = minPacks[str(packKey)]
+    for entry in minPacks:
+        print("entry:::", str(entry))
+        s = str(entry).split(":")
+        packKey = s[0]
+        packValue = s[1]
         print("packValue:::", str(packValue))
         pack_price = ordered_price_dict[packValue]
         print(pack_price)
